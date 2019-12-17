@@ -167,6 +167,9 @@ $template  = '<div class="col-md-6">{content}</div>';
             <?php echo $view['form']->rowIfExists($fields, 'resubscribe_message', $template); ?>
         </div>
         <div class="row">
+            <?php echo $view['form']->rowIfExists($fields, 'preferences_center_success_message', $template); ?>
+        </div>
+        <div class="row">
             <?php echo $view['form']->rowIfExists($fields, 'show_contact_preferences', $template); ?>
             <?php echo $view['form']->rowIfExists($fields, 'show_contact_segments', $template); ?>
         </div>
