@@ -93,11 +93,6 @@ class BatchIdToEntityHelper
      */
     public function orderByOriginalKey(array $entities)
     {
-        if (!$this->isAssociative) {
-            // The request was keyed by sequential numbers starting with 0
-            return array_values($entities);
-        }
-
         // Ensure entities are keyed by ID in order to find the original keys assuming that some entities are missing if the ID was not found
         $entitiesKeyedById = [];
         foreach ($entities as $entity) {
@@ -112,6 +107,11 @@ class BatchIdToEntityHelper
 
             $originalKey                   = $this->originalKeys[$key];
             $orderedEntities[$originalKey] = $entitiesKeyedById[$id];
+        }
+
+        if (!$this->isAssociative) {
+            // The request was keyed by sequential numbers starting with 0
+            return array_values($orderedEntities);
         }
 
         return $orderedEntities;

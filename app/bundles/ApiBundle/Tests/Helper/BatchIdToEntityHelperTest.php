@@ -13,7 +13,6 @@ namespace Mautic\ApiBundle\Tests\Helper;
 
 use Mautic\ApiBundle\Helper\BatchIdToEntityHelper;
 use Mautic\LeadBundle\Entity\Lead;
-use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 
 class BatchIdToEntityHelperTest extends TestCase
@@ -93,15 +92,15 @@ class BatchIdToEntityHelperTest extends TestCase
     public function testOriginalKeyOrderingForIdKeyArray()
     {
         $entityMock1 = $this->createMock(Lead::class);
-        $entityMock1->expects($this->once())
+        $entityMock1->expects($this->any())
             ->method('getId')
             ->willReturn(1);
         $entityMock2 = $this->createMock(Lead::class);
-        $entityMock2->expects($this->once())
+        $entityMock2->expects($this->any())
             ->method('getId')
             ->willReturn(2);
         $entityMock4 = $this->createMock(Lead::class);
-        $entityMock4->expects($this->once())
+        $entityMock4->expects($this->any())
             ->method('getId')
             ->willReturn(4);
         // Simulating ID 3 as not found
@@ -111,24 +110,29 @@ class BatchIdToEntityHelperTest extends TestCase
         $helper          = new BatchIdToEntityHelper($parameters);
         $orderedEntities = $helper->orderByOriginalKey($entities);
         $this->assertEquals([0, 1, 2], array_keys($orderedEntities));
+        $this->assertEquals([1, 2, 4], array_values(array_map(fn ($el) => $el->getId(), $orderedEntities)));
 
         $parameters      = ['ids' => [1 => 1, 2 => 2, 3 => 3, 4 => 4]];
         $helper          = new BatchIdToEntityHelper($parameters);
         $orderedEntities = $helper->orderByOriginalKey($entities);
         $this->assertEquals([1, 2, 4], array_keys($orderedEntities));
+        $this->assertEquals([1, 2, 4], array_values(array_map(fn ($el) => $el->getId(), $orderedEntities)));
     }
 
     public function testOriginalKeyOrderingForIdKeyCSVString()
     {
         $entityMock1 = $this->createMock(Lead::class);
-        $entityMock1->expects($this->never())
-            ->method('getId');
+        $entityMock1->expects($this->any())
+            ->method('getId')
+            ->willReturn(1);
         $entityMock2 = $this->createMock(Lead::class);
-        $entityMock2->expects($this->never())
-            ->method('getId');
+        $entityMock2->expects($this->any())
+            ->method('getId')
+            ->willReturn(2);
         $entityMock4 = $this->createMock(Lead::class);
-        $entityMock4->expects($this->never())
-            ->method('getId');
+        $entityMock4->expects($this->any())
+            ->method('getId')
+            ->willReturn(4);
         // Simulating ID 3 as not found
         $entities = [$entityMock4, $entityMock2, $entityMock1];
 
@@ -136,20 +140,21 @@ class BatchIdToEntityHelperTest extends TestCase
         $helper          = new BatchIdToEntityHelper($parameters);
         $orderedEntities = $helper->orderByOriginalKey($entities);
         $this->assertEquals([0, 1, 2], array_keys($orderedEntities));
+        $this->assertEquals([1, 2, 4], array_values(array_map(fn ($el) => $el->getId(), $orderedEntities)));
     }
 
     public function testOriginalKeyOrderingForSimpleArray()
     {
         $entityMock1 = $this->createMock(Lead::class);
-        $entityMock1->expects($this->once())
+        $entityMock1->expects($this->any())
             ->method('getId')
             ->willReturn(1);
         $entityMock2 = $this->createMock(Lead::class);
-        $entityMock2->expects($this->once())
+        $entityMock2->expects($this->any())
             ->method('getId')
             ->willReturn(2);
         $entityMock4 = $this->createMock(Lead::class);
-        $entityMock4->expects($this->once())
+        $entityMock4->expects($this->any())
             ->method('getId')
             ->willReturn(4);
         // Simulating ID 3 as not found
@@ -159,25 +164,27 @@ class BatchIdToEntityHelperTest extends TestCase
         $helper          = new BatchIdToEntityHelper($parameters);
         $orderedEntities = $helper->orderByOriginalKey($entities);
         $this->assertEquals([0, 1, 2], array_keys($orderedEntities));
+        $this->assertEquals([1, 2, 4], array_values(array_map(fn ($el) => $el->getId(), $orderedEntities)));
 
         $parameters      = [1 => 1, 2 => 2, 3 => 3, 4 => 4];
         $helper          = new BatchIdToEntityHelper($parameters);
         $orderedEntities = $helper->orderByOriginalKey($entities);
         $this->assertEquals([1, 2, 4], array_keys($orderedEntities));
+        $this->assertEquals([1, 2, 4], array_values(array_map(fn ($el) => $el->getId(), $orderedEntities)));
     }
 
     public function testOriginalKeyOrderingForAssociativeArray()
     {
         $entityMock1 = $this->createMock(Lead::class);
-        $entityMock1->expects($this->once())
+        $entityMock1->expects($this->any())
             ->method('getId')
             ->willReturn(1);
         $entityMock2 = $this->createMock(Lead::class);
-        $entityMock2->expects($this->once())
+        $entityMock2->expects($this->any())
             ->method('getId')
             ->willReturn(2);
         $entityMock4 = $this->createMock(Lead::class);
-        $entityMock4->expects($this->once())
+        $entityMock4->expects($this->any())
             ->method('getId')
             ->willReturn(4);
         // Simulating ID 3 as not found
@@ -192,6 +199,7 @@ class BatchIdToEntityHelperTest extends TestCase
         $helper          = new BatchIdToEntityHelper($parameters);
         $orderedEntities = $helper->orderByOriginalKey($entities);
         $this->assertEquals([0, 1, 2], array_keys($orderedEntities));
+        $this->assertEquals([1, 2, 4], array_values(array_map(fn ($el) => $el->getId(), $orderedEntities)));
 
         $parameters = [
             1 => ['id' => 1, 'foo' => 'bar'],
@@ -202,6 +210,7 @@ class BatchIdToEntityHelperTest extends TestCase
         $helper          = new BatchIdToEntityHelper($parameters);
         $orderedEntities = $helper->orderByOriginalKey($entities);
         $this->assertEquals([1, 2, 4], array_keys($orderedEntities));
+        $this->assertEquals([1, 2, 4], array_values(array_map(fn ($el) => $el->getId(), $orderedEntities)));
     }
 
     public function testOriginalKeyOrderingForFullAssociativeArray()
@@ -233,10 +242,7 @@ class BatchIdToEntityHelperTest extends TestCase
         $helper          = new BatchIdToEntityHelper($parameters);
         $orderedEntities = $helper->orderByOriginalKey($entities);
         $this->assertEquals([0, 1, 2, 3], array_keys($orderedEntities));
-        foreach ($parameters as $key => $contact) {
-            var_dump($orderedEntities[$key]->getId());
-            Assert::assertEquals($orderedEntities[$key]->getId(), $entities[$key]->getId());
-        }
+        $this->assertEquals([1, 2, 3, 4], array_values(array_map(fn ($el) => $el->getId(), $orderedEntities)));
 
         $parameters = [
             1 => ['id' => 1, 'foo' => 'bar'],
@@ -247,5 +253,6 @@ class BatchIdToEntityHelperTest extends TestCase
         $helper          = new BatchIdToEntityHelper($parameters);
         $orderedEntities = $helper->orderByOriginalKey($entities);
         $this->assertEquals([1, 2, 3, 4], array_keys($orderedEntities));
+        $this->assertEquals([1, 2, 3, 4], array_values(array_map(fn ($el) => $el->getId(), $orderedEntities)));
     }
 }
