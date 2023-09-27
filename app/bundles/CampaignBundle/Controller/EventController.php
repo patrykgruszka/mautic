@@ -6,6 +6,7 @@ use Doctrine\Persistence\ManagerRegistry;
 use Mautic\CampaignBundle\Entity\Event;
 use Mautic\CampaignBundle\EventCollector\EventCollector;
 use Mautic\CampaignBundle\Form\Type\EventType;
+use Mautic\CampaignBundle\Model\CampaignModel;
 use Mautic\CoreBundle\Controller\FormController as CommonFormController;
 use Mautic\CoreBundle\Factory\MauticFactory;
 use Mautic\CoreBundle\Factory\ModelFactory;
@@ -34,6 +35,8 @@ class EventController extends CommonFormController
 
     private DateHelper $dateHelper;
 
+    protected CampaignModel $campaignModel;
+
     public function __construct(
         FormFactoryInterface $formFactory,
         FormFieldHelper $fieldHelper,
@@ -48,10 +51,12 @@ class EventController extends CommonFormController
         Translator $translator,
         FlashBag $flashBag,
         RequestStack $requestStack,
-        CorePermissions $security
+        CorePermissions $security,
+        CampaignModel $campaignModel
     ) {
         $this->eventCollector = $eventCollector;
         $this->dateHelper     = $dateHelper;
+        $this->campaignModel  = $campaignModel;
 
         parent::__construct($formFactory, $fieldHelper, $doctrine, $factory, $modelFactory, $userHelper, $coreParametersHelper, $dispatcher, $translator, $flashBag, $requestStack, $security);
     }
@@ -574,6 +579,7 @@ class EventController extends CommonFormController
         $campaignId     = $request->query->get('campaignId');
         $session        = $request->getSession();
         $modifiedEvents = $session->get('mautic.campaign.'.$campaignId.'.events.modified', []);
+        $campaign       = $this->campaignModel->getEntity($campaignId);
 
         // ajax only for form fields
         if (!$request->isXmlHttpRequest()
@@ -591,19 +597,18 @@ class EventController extends CommonFormController
         $event = (array_key_exists($objectId, $modifiedEvents)) ? $modifiedEvents[$objectId] : null;
 
         if ('POST' == $request->getMethod() && null !== $event) {
-            // $events            = $this->eventCollector->getEventsArray();
-            // $event['settings'] = $events[$event['eventType']][$event['type']];
-            // form is valid so process the data
             $keyId          = 'new'.hash('sha1', uniqid(mt_rand()));
             $event['id']    = $event['tempId']    = $keyId;
             $session->set('mautic.campaign.events.clipboard', $event);
 
             $dataArray = [
                 'success'       => 1,
-                'mauticContent' => 'campaignEvent',
+                'mauticContent' => 'campaignEventClone',
                 'route'         => false,
                 'eventId'       => $objectId,
-                'event'         => $event,
+                'eventName'     => $event['name'],
+                'campaignId'    => $campaign->getId(),
+                'campaignName'  => $campaign->getName(),
             ];
         } else {
             $dataArray = ['success' => 0];
