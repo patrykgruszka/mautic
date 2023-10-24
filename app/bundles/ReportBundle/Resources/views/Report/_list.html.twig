@@ -21,6 +21,28 @@
                         'default': true,
                 }) }}
 
+                {{- include('@MauticCore/Helper/tableheader.html.twig', {
+                    'sessionVar': 'report',
+                    'orderBy': 'r.dateAdded',
+                    'text': 'mautic.lead.import.label.dateAdded',
+                    'class': 'visible-md visible-lg col-campaign-dateAdded',
+                }) -}}
+
+                {{- include('@MauticCore/Helper/tableheader.html.twig', {
+                    'sessionVar': 'report',
+                    'orderBy': 'r.dateModified',
+                    'text': 'mautic.lead.import.label.dateModified',
+                    'class': 'visible-md visible-lg col-campaign-dateModified',
+                    'default': true,
+                }) -}}
+
+                {{- include('@MauticCore/Helper/tableheader.html.twig', {
+                    'sessionVar': 'report',
+                    'orderBy': 'r.createdByUser',
+                    'text': 'mautic.core.createdby',
+                    'class': 'visible-md visible-lg col-campaign-createdByUser',
+                }) -}}
+
                 {{ include('@MauticCore/Helper/tableheader.html.twig', {
                         'sessionVar': 'report',
                         'orderBy': 'r.id',
@@ -64,6 +86,9 @@
                             <a href="{{ path('mautic_report_view', {'objectId': item.id}) }}" data-toggle="ajax">
                                 {{ item.name|e }}
                             </a>
+                            {% if item.isScheduled %}
+                                <i title="{{ 'mautic.report.is.scheduled'|trans }}" class="fa fa-fw fa-send-o"></i>
+                            {% endif %}
                         </div>
                         {% if item.description %}
                             <div class="text-muted mt-4">
@@ -71,6 +96,13 @@
                             </div>
                         {% endif %}
                     </td>
+                    <td class="visible-md visible-lg" title="{{ item.dateAdded ? dateToFullConcat(item.dateAdded) : '' }}">
+                        {{ item.dateAdded ? dateToDate(item.dateAdded) : '' }}
+                    </td>
+                    <td class="visible-md visible-lg" title="{{ item.dateModified ? dateToFullConcat(item.dateModified) : '' }}">
+                        {{ item.dateModified ? dateToDate(item.dateModified) : '' }}
+                    </td>
+                    <td class="visible-md visible-lg">{{ item.createdByUser }}</td>
                     <td class="visible-md visible-lg">{{ item.id }}</td>
                 </tr>
             {% endfor %}
