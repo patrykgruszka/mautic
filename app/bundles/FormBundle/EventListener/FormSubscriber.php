@@ -95,7 +95,7 @@ class FormSubscriber implements EventSubscriberInterface
             'formType'           => SubmitActionEmailType::class,
             'formTheme'          => '@MauticForm/FormTheme/FormAction/_formaction_properties_row.html.twig',
             'formTypeCleanMasks' => [
-                'message' => 'html',
+                'message' => 'raw',
             ],
             'eventName'         => FormEvents::ON_EXECUTE_SUBMIT_ACTION,
             'allowCampaignForm' => true,
@@ -217,7 +217,7 @@ class FormSubscriber implements EventSubscriberInterface
             $matchedFields[$key] = $field['alias'];
 
             // decode html chars and quotes before posting to next form
-            $payload[$key]       = htmlspecialchars_decode($value, ENT_QUOTES);
+            $payload[$key]       = html_entity_decode(htmlspecialchars_decode($value, ENT_QUOTES), ENT_QUOTES);
         }
 
         $event->setPostSubmitPayload($payload);
