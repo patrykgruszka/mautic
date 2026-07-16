@@ -28,7 +28,7 @@ export const createHeadInjectingMjmlParser = (headContent = '') => {
     return mjml2html(withHead, opts);
   };
 
-  // Allow updating the head content after creation (e.g. after code editor save)
+  // Allow updating the head content before the code editor reparses components.
   parser.updateHeadContent = (newHeadContent) => {
     cleanHead = (newHeadContent || '').replace(/<mj-preview[^>]*>[\s\S]*?<\/mj-preview>/gi, '');
   };
