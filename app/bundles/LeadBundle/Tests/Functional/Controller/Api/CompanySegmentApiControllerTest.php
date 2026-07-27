@@ -9,6 +9,7 @@ use Mautic\CoreBundle\Tests\Functional\CreateTestEntitiesTrait;
 use Mautic\CoreBundle\Tests\Functional\UserEntityTrait;
 use Mautic\LeadBundle\Entity\CompanySegment;
 use Mautic\UserBundle\Entity\User;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -251,6 +252,21 @@ final class CompanySegmentApiControllerTest extends MauticMysqlTestCase
         $this->assertTrue($segmentCompany->isManuallyRemoved());
     }
 
+    #[DataProvider('provideMissingCompanySegmentMembershipEntities')]
+    public function testCompanySegmentMembershipActionRejectsMissingEntities(int $segmentId, int $companyId): void
+    {
+        $companySegment = $this->createCompanySegment('Test Segment', 'test-segment', true);
+        $company        = $this->createCompany('Test Company', 'test@company.com');
+        $this->em->flush();
+
+        $this->client->request(
+            Request::METHOD_POST,
+            self::API_ENDPOINT.'/'.($segmentId ?: $companySegment->getId()).'/company/'.($companyId ?: $company->getId()).'/add'
+        );
+
+        self::assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
+    }
+
     public function testAddCompaniesToCompanySegment(): void
     {
         $companySegment = $this->createCompanySegment('Test Segment', 'test-segment', true);
@@ -360,6 +376,24 @@ final class CompanySegmentApiControllerTest extends MauticMysqlTestCase
         self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
     }
 
+    public function testAddCompanyToSegmentWithoutCompanySegmentAccess(): void
+    {
+        $companySegment = $this->createCompanySegment('Test Segment', 'test-segment', true);
+        $company        = $this->createCompany('Test Company', 'test@company.com');
+        $user           = $this->createUserWithPermissions([
+            'lead:leads' => 63,
+            'lead:lists' => 1,
+        ]);
+        $this->loginAsUser($user);
+
+        $this->client->request(
+            Request::METHOD_POST,
+            self::API_ENDPOINT.'/'.$companySegment->getId().'/company/'.$company->getId().'/add'
+        );
+
+        self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
+    }
+
     /**
      * @param array<string, int> $permissions
      */
@@ -392,5 +426,14 @@ final class CompanySegmentApiControllerTest extends MauticMysqlTestCase
         $this->loginUser($user);
         $this->client->setServerParameter('PHP_AUTH_USER', $user->getUsername());
         $this->client->setServerParameter('PHP_AUTH_PW', 'Maut1cR0cks!');
+    }
+
+    /**
+     * @return iterable<string, array{int, int}>
+     */
+    public static function provideMissingCompanySegmentMembershipEntities(): iterable
+    {
+        yield 'missing company segment' => [99999, 0];
+        yield 'missing company'         => [0, 99999];
     }
 }
