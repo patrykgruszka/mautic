@@ -555,6 +555,55 @@ final class ListControllerPermissionFunctionalTest extends MauticMysqlTestCase
         $this->assertStringContainsString("The segment {$segmentA->getName()} is used in {$segmentB->getName()}, please go back and check segments before deleting", $crawler->text());
     }
 
+    public function testBatchDeleteContinuesAfterDependencyFailure(): void
+    {
+        $user = $this->createUser([
+            'user-name'     => 'user-delete-partial',
+            'email'         => 'user-delete-partial@mautic-test.com',
+            'first-name'    => 'user-delete-partial',
+            'last-name'     => 'user-delete-partial',
+            'role'          => [
+                'name'      => 'perm_user_delete_partial',
+                'perm'      => 'lead:lists',
+                'bitwise'   => 82,
+            ],
+        ]);
+        $protectedSegment   = $this->createSegment('Protected segment', $user);
+        $independentSegment = $this->createSegment('Independent segment', $user);
+        $dependentSegment   = $this->createSegment('Dependent segment', $user, [[
+            'object'     => 'lead',
+            'glue'       => 'and',
+            'field'      => 'leadlist',
+            'type'       => 'leadlist',
+            'operator'   => 'in',
+            'properties' => [
+                'filter' => [$protectedSegment->getId()],
+            ],
+            'display' => '',
+            'filter'  => [$protectedSegment->getId()],
+        ]]);
+        $protectedSegmentId   = $protectedSegment->getId();
+        $independentSegmentId = $independentSegment->getId();
+
+        $this->loginOtherUser($user->getUserIdentifier());
+        $this->client->request(
+            Request::METHOD_POST,
+            '/s/segments/batchDelete?ids='.json_encode([$protectedSegmentId, $independentSegmentId])
+        );
+
+        $this->assertResponseIsSuccessful();
+        $this->assertStringContainsString(
+            "The segment {$protectedSegment->getName()} is used in {$dependentSegment->getName()}, please go back and check segments before deleting",
+            (string) $this->client->getResponse()->getContent()
+        );
+        $this->assertStringContainsString('1 segments have been deleted!', (string) $this->client->getResponse()->getContent());
+
+        $this->em->clear();
+        $repository = $this->em->getRepository(LeadList::class);
+        $this->assertInstanceOf(LeadList::class, $repository->find($protectedSegmentId));
+        $this->assertNull($repository->find($independentSegmentId));
+    }
+
     public function testViewSegment(): void
     {
         $user = $this->createUser([

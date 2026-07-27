@@ -531,6 +531,19 @@ final class ListControllerFunctionalTest extends MauticMysqlTestCase
         $this->assertStringContainsString($expectedErrorMessage, (string) $clientResponseBody['flashes']);
     }
 
+    public function testDeleteActionRequiresPost(): void
+    {
+        $segment   = $this->saveSegment('GET delete segment', 'get-delete-segment');
+        $segmentId = $segment->getId();
+
+        $this->client->request(Request::METHOD_GET, '/s/segments/delete/'.$segmentId);
+
+        $this->assertResponseIsSuccessful();
+
+        $this->em->clear();
+        $this->assertInstanceOf(LeadList::class, $this->listRepo->find($segmentId));
+    }
+
     public function testBatchDeleteUsedInCampaignSegment(): void
     {
         $list1  = $this->saveSegment('s1', 's1');
