@@ -158,14 +158,12 @@ final class CampaignSubscriberTest extends \PHPUnit\Framework\TestCase
         $mockCoreParametersHelper->method('getDefaultTimezone')
             ->willReturn('UTC');
 
-        $mockCompanySegmentModel = $this->createMock(CompanySegmentModel::class);
-
         $this->subscriber = new CampaignSubscriber(
             $this->createStub(IpLookupHelper::class),
             $this->mockLeadModel,
             $this->createStub(FieldModel::class),
             $this->mockCompanyModel,
-            $mockCompanySegmentModel,
+            $this->createStub(CompanySegmentModel::class),
             $this->createStub(CampaignModel::class),
             $mockCoreParametersHelper,
             $this->doNotContact,

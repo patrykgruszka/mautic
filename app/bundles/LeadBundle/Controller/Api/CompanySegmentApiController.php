@@ -39,7 +39,7 @@ final class CompanySegmentApiController extends CommonApiController
         ModelFactory $modelFactory,
         EventDispatcherInterface $dispatcher,
         CoreParametersHelper $coreParametersHelper,
-        private CompanySegmentModel $companySegmentModel,
+        private readonly CompanySegmentModel $companySegmentModel,
     ) {
         $this->model             = $this->companySegmentModel;
         $this->entityClass       = CompanySegment::class;

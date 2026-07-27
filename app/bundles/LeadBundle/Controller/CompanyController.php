@@ -14,6 +14,7 @@ use Mautic\LeadBundle\Field\CustomFieldFindReplace;
 use Mautic\LeadBundle\Field\DTO\CustomFieldFindReplaceCriteria;
 use Mautic\LeadBundle\Form\Type\CompanyMergeType;
 use Mautic\LeadBundle\Model\CompanyModel;
+use Mautic\LeadBundle\Model\CompanySegmentModel;
 use Mautic\LeadBundle\Model\FieldModel;
 use Mautic\LeadBundle\Model\LeadModel;
 use Mautic\LeadBundle\Services\CompanyColumnsDictionary;
@@ -32,17 +33,21 @@ final class CompanyController extends FormController
 
     private CompanyModel $companyModel;
 
+    private CompanySegmentModel $companySegmentModel;
+
     private LeadModel $leadModel;
 
     #[Required]
     public function autowireCompanyController(
         LeadModel $leadModel,
         CompanyModel $companyModel,
+        CompanySegmentModel $companySegmentModel,
         FieldModel $fieldModel,
         \Mautic\LeadBundle\Entity\CompanyRepository $companyRepository,
     ): void {
         $this->leadModel = $leadModel;
         $this->companyModel = $companyModel;
+        $this->companySegmentModel = $companySegmentModel;
         $this->fieldModel = $fieldModel;
         $this->companyRepository = $companyRepository;
     }
@@ -1193,24 +1198,19 @@ final class CompanyController extends FormController
         $companySegmentSearch = str_replace('companysegment:', '', $search);
         $companySegmentSearch = str_replace('"', '', $companySegmentSearch);
 
-        $companySegmentModel = $this->getModel('lead.company_segment');
-        if (!$companySegmentModel instanceof \Mautic\LeadBundle\Model\CompanySegmentModel) {
-            return $defaultFilter;
-        }
-
-        $companySegment = $companySegmentModel->getRepository()->findOneBy(['alias' => $companySegmentSearch]);
+        $companySegment = $this->companySegmentModel->getRepository()->findOneBy(['alias' => $companySegmentSearch]);
 
         if (!$companySegment) {
             return $defaultFilter;
         }
 
-        $segmentCompanies = $companySegmentModel->getSegmentCompanyRepository()->findBy([
+        $segmentCompanies = $this->companySegmentModel->getSegmentCompanyRepository()->findBy([
             'companySegment'  => $companySegment,
             'manuallyRemoved' => false,
         ]);
 
         $companiesIds = array_map(
-            fn ($segmentCompany) => $segmentCompany->getCompany()->getId(),
+            fn (\Mautic\LeadBundle\Entity\SegmentCompany $segmentCompany) => $segmentCompany->getCompany()->getId(),
             $segmentCompanies
         );
 

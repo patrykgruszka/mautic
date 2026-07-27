@@ -1189,17 +1189,17 @@ final class CampaignSubscriberFunctionalTest extends MauticMysqlTestCase
         $johnAfter = $this->contactRepository->getEntity($john->getId());
         $annaAfter = $this->contactRepository->getEntity($anna->getId());
 
-        self::assertNotNull($joeAfter);
-        self::assertSame('PASS', $joeAfter->getLastname(), 'Joe\'s company (Glibi) is in the segment, should take YES branch');
+        $this->assertInstanceOf(Lead::class, $joeAfter);
+        $this->assertSame('PASS', $joeAfter->getLastname(), 'Joe\'s company (Glibi) is in the segment, should take YES branch');
 
-        self::assertNotNull($maryAfter);
-        self::assertSame('PASS', $maryAfter->getLastname(), 'Mary\'s company (Glibi) is in the segment, should take YES branch');
+        $this->assertInstanceOf(Lead::class, $maryAfter);
+        $this->assertSame('PASS', $maryAfter->getLastname(), 'Mary\'s company (Glibi) is in the segment, should take YES branch');
 
-        self::assertNotNull($johnAfter);
-        self::assertSame('FAIL', $johnAfter->getLastname(), 'John\'s company (TBS) is NOT in the segment, should take NO branch');
+        $this->assertInstanceOf(Lead::class, $johnAfter);
+        $this->assertSame('FAIL', $johnAfter->getLastname(), 'John\'s company (TBS) is NOT in the segment, should take NO branch');
 
-        self::assertNotNull($annaAfter);
-        self::assertSame('FAIL', $annaAfter->getLastname(), 'Anna\'s company (Abc) is manually removed from the segment, should take NO branch');
+        $this->assertInstanceOf(Lead::class, $annaAfter);
+        $this->assertSame('FAIL', $annaAfter->getLastname(), 'Anna\'s company (Abc) is manually removed from the segment, should take NO branch');
     }
 
     /**
@@ -1333,29 +1333,29 @@ final class CampaignSubscriberFunctionalTest extends MauticMysqlTestCase
             'company'        => $companyGlibi,
             'companySegment' => $segmentA,
         ]);
-        self::assertNotNull($glibiSegmentA, 'Glibi SegmentCompany entry should exist');
-        self::assertTrue($glibiSegmentA->isManuallyRemoved(), 'Glibi should be manually removed from Segment A');
+        $this->assertInstanceOf(\Mautic\LeadBundle\Entity\SegmentCompany::class, $glibiSegmentA, 'Glibi SegmentCompany entry should exist');
+        $this->assertTrue($glibiSegmentA->isManuallyRemoved(), 'Glibi should be manually removed from Segment A');
 
         $glibiSegmentC = $segmentCompanyRepo->findOneBy([
             'company'        => $companyGlibi,
             'companySegment' => $segmentC,
         ]);
-        self::assertNotNull($glibiSegmentC, 'Glibi should be added to Segment C');
-        self::assertFalse($glibiSegmentC->isManuallyRemoved(), 'Glibi should not be manually removed from Segment C');
+        $this->assertInstanceOf(\Mautic\LeadBundle\Entity\SegmentCompany::class, $glibiSegmentC, 'Glibi should be added to Segment C');
+        $this->assertFalse($glibiSegmentC->isManuallyRemoved(), 'Glibi should not be manually removed from Segment C');
 
         $tbsSegmentB = $segmentCompanyRepo->findOneBy([
             'company'        => $companyTBS,
             'companySegment' => $segmentB,
         ]);
-        self::assertNotNull($tbsSegmentB, 'TBS should still be in Segment B');
-        self::assertFalse($tbsSegmentB->isManuallyRemoved(), 'TBS should not be manually removed from Segment B');
+        $this->assertInstanceOf(\Mautic\LeadBundle\Entity\SegmentCompany::class, $tbsSegmentB, 'TBS should still be in Segment B');
+        $this->assertFalse($tbsSegmentB->isManuallyRemoved(), 'TBS should not be manually removed from Segment B');
 
         $tbsSegmentC = $segmentCompanyRepo->findOneBy([
             'company'        => $companyTBS,
             'companySegment' => $segmentC,
         ]);
-        self::assertNotNull($tbsSegmentC, 'TBS should be added to Segment C');
-        self::assertFalse($tbsSegmentC->isManuallyRemoved(), 'TBS should not be manually removed from Segment C');
+        $this->assertInstanceOf(\Mautic\LeadBundle\Entity\SegmentCompany::class, $tbsSegmentC, 'TBS should be added to Segment C');
+        $this->assertFalse($tbsSegmentC->isManuallyRemoved(), 'TBS should not be manually removed from Segment C');
     }
 
     #[DataProvider('regexOperatorProvider')]

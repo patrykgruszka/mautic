@@ -98,9 +98,6 @@ final class TypeOperatorSubscriberTest extends \PHPUnit\Framework\TestCase
         $this->categoryModel   = $this->createMock(CategoryModel::class);
         $this->assetModel      = $this->createMock(AssetModel::class);
         $translator            = $this->createMock(TranslatorInterface::class);
-        $companySegmentModel   = $this->createMock(CompanySegmentModel::class);
-        $fieldChoicesProvider  = $this->createMock(FieldChoicesProviderInterface::class);
-        $typeOperatorProvider  = $this->createMock(TypeOperatorProviderInterface::class);
         $this->form            = $this->createMock(FormInterface::class);
         $this->subscriber      = new TypeOperatorSubscriber(
             $this->leadModel,
@@ -110,9 +107,9 @@ final class TypeOperatorSubscriberTest extends \PHPUnit\Framework\TestCase
             $this->categoryModel,
             $this->assetModel,
             $translator,
-            $companySegmentModel,
-            $fieldChoicesProvider,
-            $typeOperatorProvider,
+            $this->createStub(CompanySegmentModel::class),
+            $this->createStub(FieldChoicesProviderInterface::class),
+            $this->createStub(TypeOperatorProviderInterface::class),
             $stageRepository
         );
 

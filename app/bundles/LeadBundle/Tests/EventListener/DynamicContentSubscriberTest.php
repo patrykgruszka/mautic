@@ -221,13 +221,13 @@ final class DynamicContentSubscriberTest extends TestCase
 
         $event = new ContactFiltersEvaluateEvent($filters, $contact);
 
-        $this->companySegmentRepository->expects(self::once())
+        $this->companySegmentRepository->expects($this->once())
             ->method('isContactPrimaryCompanyInSegments')
             ->with($contactId, [1, 2, 3])
             ->willReturn(true);
 
         $this->subscriber->onContactFilterEvaluate($event);
-        self::assertTrue($event->isEvaluated());
-        self::assertTrue($event->isMatched());
+        $this->assertTrue($event->isEvaluated());
+        $this->assertTrue($event->isMatched());
     }
 }

@@ -780,15 +780,15 @@ final class UpdateSegmentsCommandFunctionalTest extends MauticMysqlTestCase
         $leadListRepository = $this->em->getRepository(LeadList::class);
 
         // Before segment update, no leads should be in the segment
-        Assert::assertSame(0, $leadListRepository->getLeadCount([$leadSegmentTwo->getId()]));
+        $this->assertSame(0, $leadListRepository->getLeadCount([$leadSegmentTwo->getId()]));
 
         // Run unified command - processes company segments first, then lead segments
         $output = $this->testSymfonyCommand(UpdateSegmentsCommand::NAME, ['--bypass-locking' => true]);
 
-        Assert::assertStringContainsString('2 total contact(s) to be added', $output->getDisplay());
+        $this->assertStringContainsString('2 total contact(s) to be added', $output->getDisplay());
 
         // After update, 2 leads should be in the segment (leadThree and leadFour from SBT which is NOT in Company Segment 2)
-        Assert::assertSame(2, $leadListRepository->getLeadCount([$leadSegmentTwo->getId()]));
+        $this->assertSame(2, $leadListRepository->getLeadCount([$leadSegmentTwo->getId()]));
     }
 
     public function testLeadSegmentWithCompanySegmentEmptyFilter(): void
@@ -830,13 +830,13 @@ final class UpdateSegmentsCommandFunctionalTest extends MauticMysqlTestCase
         // Run lead segment update command
         $output = $this->testSymfonyCommand(UpdateSegmentsCommand::NAME, ['--bypass-locking' => true]);
 
-        Assert::assertStringContainsString('2 total contact(s) to be added', $output->getDisplay());
+        $this->assertStringContainsString('2 total contact(s) to be added', $output->getDisplay());
 
         /** @var LeadListRepository $leadListRepository */
         $leadListRepository = $this->em->getRepository(LeadList::class);
 
         // 2 leads should be in the segment (leadThree and leadFour from SBT which has no company segment)
-        Assert::assertSame(2, $leadListRepository->getLeadCount([$leadSegmentOne->getId()]));
+        $this->assertSame(2, $leadListRepository->getLeadCount([$leadSegmentOne->getId()]));
     }
 
     public function testLeadSegmentWithCompanySegmentNotEmptyFilter(): void
@@ -881,13 +881,13 @@ final class UpdateSegmentsCommandFunctionalTest extends MauticMysqlTestCase
         // Run lead segment update command
         $output = $this->testSymfonyCommand(UpdateSegmentsCommand::NAME, ['--bypass-locking' => true]);
 
-        Assert::assertStringContainsString('3 total contact(s) to be added', $output->getDisplay());
+        $this->assertStringContainsString('3 total contact(s) to be added', $output->getDisplay());
 
         /** @var LeadListRepository $leadListRepository */
         $leadListRepository = $this->em->getRepository(LeadList::class);
 
         // All 3 leads should be in the segment (they all belong to companies that are in company segments)
-        Assert::assertSame(3, $leadListRepository->getLeadCount([$leadSegmentTwo->getId()]));
+        $this->assertSame(3, $leadListRepository->getLeadCount([$leadSegmentTwo->getId()]));
     }
 
     public function testUpdateLeadSegmentsUsingExcludeACompanySegment(): void
@@ -906,13 +906,13 @@ final class UpdateSegmentsCommandFunctionalTest extends MauticMysqlTestCase
         $this->createCompanyLead($companySbt, $leadFour);
 
         $totalCompanyLeadsBefore = $this->em->getRepository(CompanyLead::class)->findAll();
-        Assert::assertCount(4, $totalCompanyLeadsBefore);
+        $this->assertCount(4, $totalCompanyLeadsBefore);
 
         $companySegmentOne = $this->createCompanySegment('Test Company Segment 1', 'test_comp_segment');
         $this->addCompanyToCompanySegment($companyGlobo, $companySegmentOne);
 
         $resultSegmentCompaniesBefore = $this->em->getRepository(SegmentCompany::class)->findAll();
-        Assert::assertCount(1, $resultSegmentCompaniesBefore);
+        $this->assertCount(1, $resultSegmentCompaniesBefore);
 
         $filtersToLeadSegment = [
             [
@@ -930,16 +930,16 @@ final class UpdateSegmentsCommandFunctionalTest extends MauticMysqlTestCase
         $this->createSegment('test_segment', $filtersToLeadSegment);
 
         $leadListModel = static::getContainer()->get('mautic.lead.model.list');
-        assert($leadListModel instanceof \Mautic\LeadBundle\Model\ListModel);
+        $this->assertInstanceOf(\Mautic\LeadBundle\Model\ListModel::class, $leadListModel);
         $leadListTotalBefore = $leadListModel->getListLeadRepository()->findAll();
-        Assert::assertCount(0, $leadListTotalBefore);
+        $this->assertCount(0, $leadListTotalBefore);
 
         $output = $this->testSymfonyCommand(UpdateSegmentsCommand::NAME, ['--bypass-locking' => true]);
 
-        Assert::assertStringContainsString('2 total contact(s) to be added', $output->getDisplay());
+        $this->assertStringContainsString('2 total contact(s) to be added', $output->getDisplay());
 
         $leadListTotalAfter = $leadListModel->getListLeadRepository()->findAll();
-        Assert::assertCount(2, $leadListTotalAfter);
+        $this->assertCount(2, $leadListTotalAfter);
     }
 
     public function testUpdateCompanySegmentWithCompanySegmentMembershipFilter(): void
@@ -982,14 +982,14 @@ final class UpdateSegmentsCommandFunctionalTest extends MauticMysqlTestCase
         $companySegmentTwo            = $this->createCompanySegment('Test Segment 2', 'test_segment2', true, $filters);
         $resultSegmentCompaniesBefore = $this->em->getRepository(SegmentCompany::class)->findAll();
 
-        Assert::assertCount(1, $resultSegmentCompaniesBefore);
+        $this->assertCount(1, $resultSegmentCompaniesBefore);
 
         $this->testSymfonyCommand(UpdateSegmentsCommand::NAME, ['--bypass-locking' => true]);
 
         $resultSegmentCompaniesAfter = $this->em->getRepository(SegmentCompany::class)->findAll();
-        Assert::assertCount(2, $resultSegmentCompaniesAfter);
-        Assert::assertEquals($resultSegmentCompaniesAfter[0]->getCompany()->getId(), $resultSegmentCompaniesAfter[1]->getCompany()->getId());
-        Assert::assertEquals($resultSegmentCompaniesAfter[1]->getCompanySegment()->getId(), $companySegmentTwo->getId());
+        $this->assertCount(2, $resultSegmentCompaniesAfter);
+        $this->assertEquals($resultSegmentCompaniesAfter[0]->getCompany()->getId(), $resultSegmentCompaniesAfter[1]->getCompany()->getId());
+        $this->assertEquals($resultSegmentCompaniesAfter[1]->getCompanySegment()->getId(), $companySegmentTwo->getId());
     }
 
     public function testUpdateCompanySegmentsWithLeadListFilter(): void
@@ -1072,27 +1072,27 @@ final class UpdateSegmentsCommandFunctionalTest extends MauticMysqlTestCase
 
         $companiesInSegment1 = $this->em->getRepository(SegmentCompany::class)
             ->findBy(['companySegment' => $companySegmentLeadList1]);
-        Assert::assertCount(1, $companiesInSegment1);
-        Assert::assertEquals('leadsegment1', $companiesInSegment1[0]->getCompany()->getName());
+        $this->assertCount(1, $companiesInSegment1);
+        $this->assertEquals('leadsegment1', $companiesInSegment1[0]->getCompany()->getName());
 
         $companiesInSegment2 = $this->em->getRepository(SegmentCompany::class)
             ->findBy(['companySegment' => $companySegmentLeadList2]);
-        Assert::assertCount(1, $companiesInSegment2);
-        Assert::assertEquals('leadsegment2', $companiesInSegment2[0]->getCompany()->getName());
+        $this->assertCount(1, $companiesInSegment2);
+        $this->assertEquals('leadsegment2', $companiesInSegment2[0]->getCompany()->getName());
 
         $companiesInEmptySegment = $this->em->getRepository(SegmentCompany::class)
             ->findBy(['companySegment' => $companySegmentEmptyLeadList]);
-        $companyNames = array_map(fn ($cs) => $cs->getCompany()->getName(), $companiesInEmptySegment);
-        Assert::assertCount(2, $companiesInEmptySegment);
-        Assert::assertContains('noleadsegment', $companyNames);
-        Assert::assertContains('companywithoutlead', $companyNames);
+        $companyNames = array_map(fn (SegmentCompany $cs) => $cs->getCompany()->getName(), $companiesInEmptySegment);
+        $this->assertCount(2, $companiesInEmptySegment);
+        $this->assertContains('noleadsegment', $companyNames);
+        $this->assertContains('companywithoutlead', $companyNames);
 
         $companiesInNotEmptySegment = $this->em->getRepository(SegmentCompany::class)
             ->findBy(['companySegment' => $companySegmentNotEmptyLeadList]);
-        Assert::assertCount(2, $companiesInNotEmptySegment);
-        $companyNames = array_map(fn ($cs) => $cs->getCompany()->getName(), $companiesInNotEmptySegment);
-        Assert::assertContains('leadsegment1', $companyNames);
-        Assert::assertContains('leadsegment2', $companyNames);
+        $this->assertCount(2, $companiesInNotEmptySegment);
+        $companyNames = array_map(fn (SegmentCompany $cs) => $cs->getCompany()->getName(), $companiesInNotEmptySegment);
+        $this->assertContains('leadsegment1', $companyNames);
+        $this->assertContains('leadsegment2', $companyNames);
     }
 
     #[DataProvider('provideSegmentRebuildScenarios')]
@@ -1145,18 +1145,18 @@ final class UpdateSegmentsCommandFunctionalTest extends MauticMysqlTestCase
             ->findBy(['companySegment' => $companySegment]);
 
         if ($expectLeadRebuilt) {
-            Assert::assertSame(1, $leadCount);
-            Assert::assertStringContainsString('1 total contact(s) to be added', $display);
+            $this->assertSame(1, $leadCount);
+            $this->assertStringContainsString('1 total contact(s) to be added', $display);
         } else {
-            Assert::assertSame(0, $leadCount);
+            $this->assertSame(0, $leadCount);
         }
 
         if ($expectCompanyRebuilt) {
-            Assert::assertCount(1, $companiesInSegment);
-            Assert::assertStringContainsString('Rebuilding company segments', $display);
+            $this->assertCount(1, $companiesInSegment);
+            $this->assertStringContainsString('Rebuilding company segments', $display);
         } else {
-            Assert::assertCount(0, $companiesInSegment);
-            Assert::assertStringNotContainsString('Rebuilding company segments', $display);
+            $this->assertCount(0, $companiesInSegment);
+            $this->assertStringNotContainsString('Rebuilding company segments', $display);
         }
     }
 
@@ -1195,16 +1195,10 @@ final class UpdateSegmentsCommandFunctionalTest extends MauticMysqlTestCase
         $display = $output->getDisplay();
 
         // Segment 2 was rebuilt
-        Assert::assertStringContainsString(
-            sprintf('Rebuilding company segments for segment %d', $companySegment2->getId()),
-            $display
-        );
+        $this->assertStringContainsString(sprintf('Rebuilding company segments for segment %d', $companySegment2->getId()), $display);
 
         // Segment 1 was excluded
-        Assert::assertStringNotContainsString(
-            sprintf('Rebuilding company segments for segment %d', $companySegment1->getId()),
-            $display
-        );
+        $this->assertStringNotContainsString(sprintf('Rebuilding company segments for segment %d', $companySegment1->getId()), $display);
     }
 
     private function addLeadToSegment(Lead $lead, LeadList $segment): void

@@ -26,6 +26,7 @@ return function (ContainerConfigurator $configurator): void {
         'Segment/Query/QueryException.php',
         'Segment/Query/Expression',
         'Segment/Stat',
+        'Validator/Constraints/UniqueCompanySegmentAlias.php',
     ];
 
     $services->load('Mautic\\LeadBundle\\', '../')
