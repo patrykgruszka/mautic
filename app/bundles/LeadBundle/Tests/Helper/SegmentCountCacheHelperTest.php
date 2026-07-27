@@ -208,6 +208,31 @@ final class SegmentCountCacheHelperTest extends TestCase
         $this->assertSame(4, $cacheItem->get());
     }
 
+    public function testCountUpdatesClearRecountMarker(): void
+    {
+        $segmentId = 1;
+        $cacheItem = $this->createCacheItem('segment.'.$segmentId.'.lead', 1, true);
+
+        $this->cacheProviderMock
+            ->method('hasItem')
+            ->willReturnCallback(fn (string $key): bool => in_array($key, ['segment.'.$segmentId.'.lead', 'segment.'.$segmentId.'.lead.recount']));
+        $this->cacheProviderMock
+            ->method('getItem')
+            ->with('segment.'.$segmentId.'.lead')
+            ->willReturn($cacheItem);
+        $this->cacheProviderMock
+            ->expects($this->exactly(2))
+            ->method('deleteItem')
+            ->with('segment.'.$segmentId.'.lead.recount');
+        $this->coreParametersHelperMock
+            ->method('get')
+            ->with('segment_api_count_cache_ttl', 43200)
+            ->willReturn(43200);
+
+        $this->segmentCountCacheHelper->incrementSegmentContactCount($segmentId);
+        $this->segmentCountCacheHelper->decrementSegmentContactCount($segmentId);
+    }
+
     public function testDecrementSegmentCountIsNotNegative(): void
     {
         $segmentId = 1;
