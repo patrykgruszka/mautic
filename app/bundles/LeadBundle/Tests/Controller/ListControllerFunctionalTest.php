@@ -81,6 +81,8 @@ final class ListControllerFunctionalTest extends MauticMysqlTestCase
         $crawler = $this->client->request(Request::METHOD_GET, '/s/segments/edit/'.$segment->getId());
         self::assertResponseIsSuccessful();
         $this->assertGreaterThan(0, $crawler->filter('#leadlist_filters_0_operator option')->count());
+        $this->assertCount(1, $crawler->filter('#leadlist_filters_0 .copy-filter-group'));
+        $this->assertCount(1, $crawler->filter('#leadlist_filters_0 .remove-selected'));
     }
 
     public function testSegmentWithProject(): void

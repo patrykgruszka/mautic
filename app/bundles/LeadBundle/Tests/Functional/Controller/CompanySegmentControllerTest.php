@@ -93,6 +93,8 @@ final class CompanySegmentControllerTest extends MauticMysqlTestCase
         $this->assertResponseIsSuccessful('New company segment form should return 200.');
         $this->assertStringContainsString('New company segment', (string) $response->getContent());
         $this->assertStringContainsString('company_segments[name]', (string) $response->getContent());
+        $this->assertStringContainsString('copy-filter-group', (string) $response->getContent());
+        $this->assertStringContainsString('remove-selected', (string) $response->getContent());
     }
 
     public function testNewActionCreatesSegment(): void
