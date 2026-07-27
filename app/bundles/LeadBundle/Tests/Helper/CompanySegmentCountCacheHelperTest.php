@@ -39,8 +39,8 @@ final class CompanySegmentCountCacheHelperTest extends TestCase
         $this->helper->setSegmentCompanyCount(12, 7);
 
         $expiry = (new \ReflectionProperty(CacheItem::class, 'expiry'))->getValue($cacheItem);
-        self::assertSame(7, $cacheItem->get());
-        self::assertGreaterThanOrEqual($before + 60, $expiry);
+        $this->assertSame(7, $cacheItem->get());
+        $this->assertGreaterThanOrEqual($before + 60, $expiry);
     }
 
     public function testSetDoesNotAddExpiryWhenTtlIsDisabled(): void
@@ -53,7 +53,7 @@ final class CompanySegmentCountCacheHelperTest extends TestCase
 
         $this->helper->setSegmentCompanyCount(12, 7);
 
-        self::assertNull((new \ReflectionProperty(CacheItem::class, 'expiry'))->getValue($cacheItem));
+        $this->assertNull((new \ReflectionProperty(CacheItem::class, 'expiry'))->getValue($cacheItem));
     }
 
     public function testIncrementAndDecrementDoNotGoBelowZero(): void
@@ -66,13 +66,13 @@ final class CompanySegmentCountCacheHelperTest extends TestCase
         $this->coreParametersHelper->method('get')->willReturn(60);
 
         $this->helper->incrementSegmentCompanyCount(12);
-        self::assertSame(1, $cacheItem->get());
+        $this->assertSame(1, $cacheItem->get());
 
         $this->helper->decrementSegmentCompanyCount(12);
-        self::assertSame(0, $cacheItem->get());
+        $this->assertSame(0, $cacheItem->get());
 
         $this->helper->decrementSegmentCompanyCount(12);
-        self::assertSame(0, $cacheItem->get());
+        $this->assertSame(0, $cacheItem->get());
     }
 
     public function testInvalidateDeletesExistingCompanyCount(): void

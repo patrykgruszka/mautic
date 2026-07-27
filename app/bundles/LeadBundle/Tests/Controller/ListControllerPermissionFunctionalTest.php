@@ -601,7 +601,7 @@ final class ListControllerPermissionFunctionalTest extends MauticMysqlTestCase
         $this->em->clear();
         $repository = $this->em->getRepository(LeadList::class);
         $this->assertInstanceOf(LeadList::class, $repository->find($protectedSegmentId));
-        $this->assertNull($repository->find($independentSegmentId));
+        $this->assertNotInstanceOf(LeadList::class, $repository->find($independentSegmentId));
     }
 
     public function testViewSegment(): void
